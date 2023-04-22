@@ -1,57 +1,55 @@
 package charts
 
 import (
-	"cs-warnings/types"
-	"io"
-	"os"
+	localtypes "cs-warnings/types"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
+	"github.com/go-echarts/go-echarts/v2/types"
 )
 
-var ToolTipFormatter = `
-function (info) {
-	return info.name.slice(0, 7) + '<div class="tooltip-title">' + info.name.slice(8) + '</div>'; 
-}
-`
-
-func Render(warnings map[string]types.Warning) {
-	warningCnts := make(map[string]WarningCount)
+func RenderPie(warnings map[string]localtypes.Warning) *charts.Pie {
+	warningCnts := make(map[string]WarningCounter)
 	for _, warning := range warnings {
-		count := warningCnts[warning.Code]
-		count.count++
-		if count.title == "" {
-			count.title = warning.Description
+		counter := warningCnts[warning.Code]
+		counter.Value++
+		if counter.Name == "" {
+			counter.Name = warning.Description
 		}
-		warningCnts[warning.Code] = count
+		warningCnts[warning.Code] = counter
 	}
 
 	pieData := make([]opts.PieData, 0)
 
-	for key, count := range warningCnts {
-		pieData = append(pieData, opts.PieData{Name: key + ": " + count.title, Value: count.count})
-
+	for code, counter := range warningCnts {
+		pieData = append(pieData, opts.PieData{Name: code + ": " + counter.Name, Value: counter.Value})
 	}
 
 	pie := charts.NewPie()
 	pie.SetGlobalOptions(
-		charts.WithLegendOpts(opts.Legend{Show: false, Orient: "vertical", Left: "0"}),
-		charts.WithTooltipOpts(opts.Tooltip{Show: true, Formatter: opts.FuncOpts(ToolTipFormatter), Enterable: true, TriggerOn: "click"}),
+		charts.WithInitializationOpts(opts.Initialization{Theme: types.ThemeMacarons}),
+		charts.WithTitleOpts(opts.Title{
+			Title: "All warnings across all projects",
+			Left:  "center",
+		}),
+		charts.WithLegendOpts(opts.Legend{Show: false}),
+		charts.WithTooltipOpts(opts.Tooltip{
+			Show:      true,
+			Formatter: opts.FuncOpts(ToolTipFormatter),
+			Enterable: true,
+			TriggerOn: "click",
+		}),
 	)
 	pie.AddSeries("pie", pieData).SetSeriesOptions(
-		charts.WithLabelOpts(opts.Label{Show: true, Formatter: "{c} ({d}%)"}),
+		charts.WithLabelOpts(opts.Label{Show: true, Formatter: opts.FuncOpts(LableFormatter)}),
 	)
-	f, err := os.Create("pie.html")
-	if err != nil {
-		panic(err)
-	}
-	pie.Render(io.MultiWriter(f))
 
+	return pie
 }
 
-type WarningCount struct {
-	count int
-	title string
+type WarningCounter struct {
+	Value int
+	Name  string
 }
 
 // return JSON.stringify(Object.keys(info))
