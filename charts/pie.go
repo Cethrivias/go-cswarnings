@@ -9,19 +9,19 @@ import (
 )
 
 func RenderPie(warnings map[string]localtypes.Warning) *charts.Pie {
-	warningCnts := make(map[string]WarningCounter)
+	warningCounts := make(map[string]WarningCounter)
 	for _, warning := range warnings {
-		counter := warningCnts[warning.Code]
+		counter := warningCounts[warning.Code]
 		counter.Value++
 		if counter.Name == "" {
 			counter.Name = warning.Description
 		}
-		warningCnts[warning.Code] = counter
+		warningCounts[warning.Code] = counter
 	}
 
 	pieData := make([]opts.PieData, 0)
 
-	for code, counter := range warningCnts {
+	for code, counter := range warningCounts {
 		pieData = append(pieData, opts.PieData{Name: code + ": " + counter.Name, Value: counter.Value})
 	}
 

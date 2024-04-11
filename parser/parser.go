@@ -30,14 +30,14 @@ func ParseWarnings(r io.Reader) map[string]types.Warning {
 	return <-result
 }
 
-func mapWarnings(warnings chan types.Warning, warningsChan chan map[string]types.Warning) {
-	result := make(map[string]types.Warning)
+func mapWarnings(warnings chan types.Warning, result chan map[string]types.Warning) {
+	warningsMap := make(map[string]types.Warning)
 	for warn := range warnings {
-		result[warn.Path+warn.Code] = warn
+		warningsMap[warn.Path+warn.Code] = warn
 	}
 
-	warningsChan <- result
-	close(warningsChan)
+	result <- warningsMap
+	close(result)
 }
 
 func parseLine(line string, r chan types.Warning) {

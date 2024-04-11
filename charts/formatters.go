@@ -8,6 +8,10 @@ function (info) {
 
 var LableFormatter = `
 function (info) {
-	return info.name.slice(0, 6) + ' (' + info.value + ')'; 
+	let idx = info.name.indexOf(':');
+	if (idx >= 0) {
+	  return info.name.slice(0, idx) + ' (' + info.value + ')'; 
+	}
+	return '(' + info.value + ') ' + info.name 
 }
 `

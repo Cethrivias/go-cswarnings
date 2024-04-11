@@ -73,9 +73,9 @@ func RenderTreeMap(warnings map[string]localtypes.Warning) *charts.TreeMap {
 						{ // Series
 							ItemStyle: &opts.ItemStyle{
 								BorderColor: "#777",
-								BorderWidth: 1,
+								BorderWidth: 2,
 								GapWidth:    1},
-							UpperLabel: &opts.UpperLabel{Show: false},
+							UpperLabel: &opts.UpperLabel{Show: true},
 						},
 						{ // Level
 							ItemStyle: &opts.ItemStyle{
